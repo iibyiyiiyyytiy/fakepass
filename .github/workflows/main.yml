@@ -32,6 +32,13 @@ jobs:
           cd $HOME/theos/sdks
           git sparse-checkout set iPhoneOS14.5.sdk
 
+      - name: Build & Install libSandy
+        run: |
+          git clone --depth 1 https://github.com/opa334/libSandy.git $HOME/libSandy
+          cd $HOME/libSandy
+          chmod +x install_to_theos.sh
+          ./install_to_theos.sh
+
       - name: Build Rootful Package
         run: |
           make clean
