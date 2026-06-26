@@ -32,10 +32,11 @@ jobs:
           cd $HOME/theos/sdks
           git sparse-checkout set iPhoneOS14.5.sdk
 
-      - name: Install macOS XPC Headers into Theos
+      - name: Install Theos-Compatible XPC Headers
         run: |
+          git clone --depth 1 https://github.com/JonasGessner/Theos-NIC-Templates.git $HOME/xpc-headers
           mkdir -p $THEOS/include
-          cp -r "$(xcrun --sdk macosx --show-sdk-path)/usr/include/xpc" "$THEOS/include"
+          cp -r "$HOME/xpc-headers/XPC_Service.nic/xpc" "$THEOS/include/"
 
       - name: Build & Install libSandy
         run: |
@@ -47,19 +48,4 @@ jobs:
       - name: Build Rootful Package
         run: |
           make clean
-          make package FINALPACKAGE=1
-          mkdir -p output/rootful
-          mv packages/*.deb output/rootful/
-
-      - name: Build Rootless Package
-        run: |
-          make clean
-          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
-          mkdir -p output/rootless
-          mv packages/*.deb output/rootless/
-
-      - name: Upload Compiled DEB Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: FakePass-Compiled
-          path: output/
+          make package​​​​​​​​​​​​​​​​
