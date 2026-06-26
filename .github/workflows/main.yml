@@ -1,0 +1,54 @@
+name: Build FakePass DEB
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install System Dependencies
+        run: brew install ldid dpkg
+
+      - name: Setup Theos Environment
+        run: |
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+      - name: Setup iOS SDK (14.5)
+        run: |
+          rm -rf $HOME/theos/sdks
+          mkdir -p $HOME/theos/sdks
+          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
+          tar -xf iPhoneOS14.5.sdk.tar.xz -C $HOME/theos/sdks/
+          rm iPhoneOS14.5.sdk.tar.xz
+
+      - name: Build Rootful Package
+        run: |
+          make clean
+          make package FINALPACKAGE=1
+          mkdir -p output/rootful
+          mv packages/*.deb output/rootful/
+
+      - name: Build Rootless Package
+        run: |
+          make clean
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+          mkdir -p output/rootless
+          mv packages/*.deb output/rootless/
+
+      - name: Upload Compiled DEB Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: FakePass-Compiled
+          path: output/
