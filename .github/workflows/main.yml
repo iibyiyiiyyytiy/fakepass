@@ -45,6 +45,9 @@ jobs:
           chmod +x install_to_theos.sh
           ./install_to_theos.sh
 
+      - name: Remove Temporary XPC Header Override
+        run: rm -rf $THEOS/include/xpc
+
       - name: Build Rootful Package
         run: |
           make clean
