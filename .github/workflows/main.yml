@@ -25,12 +25,12 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
-      - name: Setup iOS SDK (14.5)
+      - name: Setup iOS SDKs
         run: |
           rm -rf $HOME/theos/sdks
           git clone --depth 1 --sparse https://github.com/theos/sdks.git $HOME/theos/sdks
           cd $HOME/theos/sdks
-          git sparse-checkout set iPhoneOS14.5.sdk
+          git sparse-checkout set iPhoneOS14.5.sdk iPhoneOS16.5.sdk
 
       - name: Install Theos-Compatible XPC Headers
         run: |
@@ -48,4 +48,19 @@ jobs:
       - name: Build Rootful Package
         run: |
           make clean
-          make package​​​​​​​​​​​​​​​​
+          make package FINALPACKAGE=1
+          mkdir -p output/rootful
+          mv packages/*.deb output/rootful/
+
+      - name: Build Rootless Package
+        run: |
+          make clean
+          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+          mkdir -p output/rootless
+          mv packages/*.deb output/rootless/
+
+      - name: Upload Compiled DEB Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: FakePass-Compiled
+          path: output/
