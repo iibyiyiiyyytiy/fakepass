@@ -32,6 +32,11 @@ jobs:
           cd $HOME/theos/sdks
           git sparse-checkout set iPhoneOS14.5.sdk
 
+      - name: Install macOS XPC Headers into Theos
+        run: |
+          mkdir -p $THEOS/include
+          cp -r "$(xcrun --sdk macosx --show-sdk-path)/usr/include/xpc" "$THEOS/include"
+
       - name: Build & Install libSandy
         run: |
           git clone --depth 1 https://github.com/opa334/libSandy.git $HOME/libSandy
